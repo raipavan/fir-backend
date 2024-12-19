@@ -6,7 +6,7 @@ const GoogleFormArtifact = require('../Backend/abi/FIRManagement.json');
 const path = require('path');
 dotenv.config();
 
-const CONTRACT_ADDRESS = '0x3B1E30fe0E74D0621cd761dF1f5Aa0984D781C5d';
+const CONTRACT_ADDRESS = '0x23C7f3fA7E200Ef94605a6949905fc2aAa747895';
 const GANACHE_URL='http://127.0.0.1:7545';
 const contractABI = GoogleFormArtifact.abi; 
 
@@ -35,6 +35,37 @@ function safeJSON(obj) {
   );
 }
 
+app.get('/view-all-fir-court', async (req, res) => {
+  try {
+    const { from } = req.query;
+
+    if (!from) {
+      return res.status(400).json({ message: "'from' address is required" });
+    }
+
+    const entries = await GoogleForm.methods.viewAllFIRCourt().call({ from });
+    res.status(200).send(safeJSON(entries));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.get('/view-all-fir-investigate', async (req, res) => {
+  try {
+    const { from } = req.query;
+
+    if (!from) {
+      return res.status(400).json({ message: "'from' address is required" });
+    }
+
+    const entries = await GoogleForm.methods.viewAllFIRInvestigator().call({ from });
+    res.status(200).send(safeJSON(entries));
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 // View all FIRs
 app.get('/view-all-fir', async (req, res) => {
   try {
@@ -164,11 +195,8 @@ app.post('/validate-fir', async (req, res) => {
 app.post('/assign-role', async (req, res) => {
   try {
     const { address, role, sender_address } = req.body;
-
-    if (!sender_address) {
-      return res.status(400).send({ message: "'sender_address' is required" });
-    }
-
+   
+    
     const result = await GoogleForm.methods.assignRole(address, role).send({
       from: sender_address,
       gas: 6721975,
